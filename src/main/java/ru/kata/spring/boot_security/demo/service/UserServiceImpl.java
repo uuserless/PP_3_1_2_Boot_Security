@@ -1,5 +1,8 @@
 package ru.kata.spring.boot_security.demo.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,10 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 @Service
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -26,7 +25,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository,@Lazy PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -70,7 +69,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findUserByUsername(username);
         if (user == null) {
-            throw new UsernameNotFoundException(String.format("Пользователь %s не найден",username));
+            throw new UsernameNotFoundException(
+                    String.format("Пользователь %s не найден", username));
         }
 
         List<GrantedAuthority> authorities = user.getRoles()
@@ -78,7 +78,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .map(role -> new SimpleGrantedAuthority(role.getRole()))
                 .collect(Collectors.toList());
 
-        return new org.springframework.security.core.userdetails.User(user.getUsername(),user.getPassword(),authorities);
+        return new org.springframework.security.core.userdetails.User(user.getUsername(),
+                user.getPassword(), authorities);
     }
 
 }
